@@ -1,0 +1,57 @@
+const mongoose = require("mongoose");
+
+const ProposalScheme = new mongoose.Schema(
+  {
+    prospectOrClient: {
+      type: mongoose.ObjectId,
+      ref: "prospect",
+    },
+    type: Number,
+    // type: 0 --> prospect
+    // type: 1 --> client
+    plannings: [
+      {
+        type: mongoose.ObjectId,
+        ref: "planning",
+      },
+    ],
+    positionsWithAmount: [{ type: Object }],
+    expirationDays: Number,
+    status: Number,
+    statusLabel: String,
+    moneyBadge: String,
+    name: String,
+    formNumber: {
+      type: Number,
+      unique: true,
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
+    company_id: {
+      type: mongoose.ObjectId,
+      ref: "users",
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
+ProposalScheme.pre("save", function (next) {
+  if (this.status === 0) {
+    this.statusLabel = "Enviado";
+    next();
+  }
+  if (this.status === 1) {
+    this.statusLabel = "Aceptado";
+    next();
+  }
+  if (this.status === 2) {
+    this.statusLabel = "Rechazado";
+    next();
+  }
+});
+
+module.exports = mongoose.model("proposal", ProposalScheme);
